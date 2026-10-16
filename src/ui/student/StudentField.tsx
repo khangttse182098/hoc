@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import type { PageInfo, Question, QuestionResult } from '../../model/types';
 import { hasAnchors } from '../../model/anchors';
+import { OPTION_WORD } from '../../model/trueFalse';
 import { normToPx } from '../../pdf/coords';
 
 export interface FieldFeedback {
@@ -82,7 +83,7 @@ export function StudentField({ question: q, page, scale, value, onChange, readOn
   const disabled = readOnly || !onChange;
   const anchored = q.type === 'multiple-choice' && hasAnchors(q);
   // Marker size follows the zoom level so it sits over one printed letter.
-  const spot = Math.max(16, Math.min(44, 20 * scale));
+  const spot = Math.max(14, Math.min(30, 14 * scale));
 
   const optionClass = (opt: string, base: string) => {
     let cls = base;
@@ -108,12 +109,12 @@ export function StudentField({ question: q, page, scale, value, onChange, readOn
               key={opt}
               type="button"
               className={cls}
-              style={{ left: `${a.x * 100}%`, top: `${a.y * 100}%`, width: spot, height: spot }}
+              style={{ left: `${a.x * 100}%`, top: `${a.y * 100}%`, width: spot, height: spot, fontSize: Math.round(spot * 0.55) }}
               disabled={disabled}
               onClick={() => onChange?.(q.id, value === opt ? '' : opt)}
               aria-pressed={value === opt}
               aria-label={`Question ${q.number} option ${opt}`}
-              title={opt}
+              title={OPTION_WORD[opt] ?? opt}
             >
               {marked ? opt : ''}
             </button>
@@ -131,6 +132,7 @@ export function StudentField({ question: q, page, scale, value, onChange, readOn
                 onClick={() => onChange?.(q.id, value === opt ? '' : opt)}
                 aria-pressed={value === opt}
                 aria-label={`Question ${q.number} option ${opt}`}
+                title={OPTION_WORD[opt]}
               >
                 {opt}
               </button>

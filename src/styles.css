@@ -259,9 +259,9 @@ table.results-table { width: 100%; border-collapse: collapse; background: var(--
 /* Author view of anchors: small labelled rings, draggable */
 .ov.author.mc.anchored .ov-preview { display: none; }
 .ov-anchor {
-  position: absolute; transform: translate(-50%, -50%); width: 22px; height: 22px; border-radius: 50%;
+  position: absolute; transform: translate(-50%, -50%); width: 18px; height: 18px; border-radius: 50%;
   border: 2px solid var(--accent); background: rgba(255,255,255,0.85); color: var(--accent);
-  display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;
   cursor: grab; box-sizing: border-box; z-index: 1;
 }
 .ov-anchor:active { cursor: grabbing; }

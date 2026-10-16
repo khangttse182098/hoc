@@ -9,6 +9,22 @@ import type {
 } from './types';
 import { PACKAGE_FORMAT_VERSION } from './types';
 import { newId } from './ids';
+import { trueFalseOptions } from './trueFalse';
+
+/**
+ * What the author can add from the toolbar: the question types plus the
+ * True/False preset, which produces a multiple-choice question.
+ */
+export type AuthorTool = QuestionType | 'true-false';
+
+/** Whether new True/False fields include "Not Given"; remembers the author's last choice. */
+let defaultNotGiven = false;
+export function setDefaultNotGiven(v: boolean) {
+  defaultNotGiven = v;
+}
+export function getDefaultNotGiven() {
+  return defaultNotGiven;
+}
 
 export const DEFAULT_MATCHING: TextMatchingRules = {
   caseInsensitive: true,
@@ -39,7 +55,7 @@ export function createManifest(title: string, pdf: PdfAssetInfo): ExamManifest {
 }
 
 export function createQuestion(
-  type: QuestionType,
+  type: AuthorTool,
   pageIndex: number,
   rect: NormRect,
   number: string,
@@ -48,6 +64,8 @@ export function createQuestion(
   switch (type) {
     case 'multiple-choice':
       return { ...base, type, options: ['A', 'B', 'C', 'D'], correct: '', layout: 'horizontal' };
+    case 'true-false':
+      return { ...base, type: 'multiple-choice', options: trueFalseOptions(defaultNotGiven), correct: '', layout: 'horizontal' };
     case 'short-answer':
       return { ...base, type, accepted: [], matching: { ...DEFAULT_MATCHING } };
     case 'manual':
@@ -56,12 +74,14 @@ export function createQuestion(
 }
 
 /** Default overlay size (as a fraction of page width/height) per question type. */
-export function defaultRectFor(type: QuestionType, pageAspect: number): { w: number; h: number } {
+export function defaultRectFor(type: AuthorTool, pageAspect: number): { w: number; h: number } {
   // pageAspect = width / height; heights are expressed in page-height units.
   const lineH = 0.022 * (0.707 / pageAspect); // ~ one text line on A4
   switch (type) {
     case 'multiple-choice':
       return { w: 0.28, h: lineH * 1.3 };
+    case 'true-false':
+      return { w: 0.16, h: lineH * 1.3 };
     case 'short-answer':
       return { w: 0.25, h: lineH * 1.2 };
     case 'manual':

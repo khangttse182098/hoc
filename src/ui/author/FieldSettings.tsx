@@ -1,5 +1,6 @@
-import type { Question, QuestionType, TextMatchingRules } from '../../model/types';
-import { DEFAULT_MATCHING } from '../../model/defaults';
+import type { Question, TextMatchingRules } from '../../model/types';
+import { DEFAULT_MATCHING, getDefaultNotGiven, setDefaultNotGiven, type AuthorTool } from '../../model/defaults';
+import { OPTION_WORD, hasNotGiven, isTrueFalse, trueFalseOptions, withNotGiven } from '../../model/trueFalse';
 
 interface Props {
   question: Question;
@@ -11,8 +12,9 @@ interface Props {
   onDelete: () => void;
 }
 
-const TYPE_LABEL: Record<QuestionType, string> = {
+const TYPE_LABEL: Record<AuthorTool, string> = {
   'multiple-choice': 'Multiple choice',
+  'true-false': 'True / False / Not Given',
   'short-answer': 'Short answer / fill in',
   manual: 'Manual grading',
 };
@@ -20,12 +22,17 @@ const TYPE_LABEL: Record<QuestionType, string> = {
 export function FieldSettings({ question: q, onChange, onCopy, onSetAnchors, onDuplicate, onDelete }: Props) {
   const set = (patch: Partial<Question>) => onChange({ ...q, ...patch } as Question);
 
-  const changeType = (type: QuestionType) => {
-    if (type === q.type) return;
+  // True/False is a multiple-choice question with a fixed option set.
+  const shownType: AuthorTool = isTrueFalse(q) ? 'true-false' : q.type;
+  const changeType = (type: AuthorTool) => {
+    if (type === shownType) return;
     const base = { id: q.id, number: q.number, pageIndex: q.pageIndex, rect: q.rect, points: q.points, explanation: q.explanation };
     switch (type) {
       case 'multiple-choice':
         onChange({ ...base, type, options: ['A', 'B', 'C', 'D'], correct: '', layout: 'horizontal' });
+        break;
+      case 'true-false':
+        onChange({ ...base, type: 'multiple-choice', options: trueFalseOptions(getDefaultNotGiven()), correct: '', layout: 'horizontal' });
         break;
       case 'short-answer':
         onChange({ ...base, type, accepted: [], matching: { ...DEFAULT_MATCHING } });
@@ -49,8 +56,8 @@ export function FieldSettings({ question: q, onChange, onCopy, onSetAnchors, onD
       </div>
       <div className="field row">
         <label>Type</label>
-        <select className="select" style={{ width: 170 }} value={q.type} onChange={(e) => changeType(e.target.value as QuestionType)}>
-          {(Object.keys(TYPE_LABEL) as QuestionType[]).map((t) => (
+        <select className="select" style={{ width: 170 }} value={shownType} onChange={(e) => changeType(e.target.value as AuthorTool)}>
+          {(Object.keys(TYPE_LABEL) as AuthorTool[]).map((t) => (
             <option key={t} value={t}>{TYPE_LABEL[t]}</option>
           ))}
         </select>
@@ -68,9 +75,23 @@ export function FieldSettings({ question: q, onChange, onCopy, onSetAnchors, onD
         />
       </div>
 
+      {q.type === 'multiple-choice' && isTrueFalse(q) && (
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={hasNotGiven(q)}
+            onChange={(e) => {
+              setDefaultNotGiven(e.target.checked);
+              onChange(withNotGiven(q, e.target.checked));
+            }}
+          />
+          Include "Not Given" (NG) as a third choice
+        </label>
+      )}
+
       {q.type === 'multiple-choice' && (
         <>
-          <div className="field">
+          {!isTrueFalse(q) && <div className="field">
             <label>Options (comma-separated)</label>
             <input
               className="input small"
@@ -89,13 +110,13 @@ export function FieldSettings({ question: q, onChange, onCopy, onSetAnchors, onD
                 if (q.options.length < 2) onChange({ ...q, options: ['A', 'B'] });
               }}
             />
-          </div>
+          </div>}
           <div className="field row">
             <label>Correct answer</label>
             <select className="select" style={{ width: 110 }} value={q.correct} onChange={(e) => onChange({ ...q, correct: e.target.value })}>
               <option value="">— not set —</option>
               {q.options.map((o) => (
-                <option key={o} value={o}>{o}</option>
+                <option key={o} value={o}>{isTrueFalse(q) ? `${o} — ${OPTION_WORD[o]}` : o}</option>
               ))}
             </select>
           </div>

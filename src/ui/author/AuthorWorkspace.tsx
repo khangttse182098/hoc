@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { extendRectToPoint, toAnchor } from '../../model/anchors';
-import { createQuestion, defaultRectFor, nextQuestionNumber } from '../../model/defaults';
+import { createQuestion, defaultRectFor, nextQuestionNumber, type AuthorTool } from '../../model/defaults';
 import { newId } from '../../model/ids';
-import type { ExamManifest, NormPoint, NormRect, PageInfo, Question, QuestionType, StoredExam } from '../../model/types';
+import type { ExamManifest, NormPoint, NormRect, PageInfo, Question, StoredExam } from '../../model/types';
 import { clampNormRect, normToPx } from '../../pdf/coords';
 import { PdfViewer, type PdfViewerHandle } from '../../pdf/PdfViewer';
 import { useZoom } from '../../pdf/useZoom';
@@ -65,7 +65,7 @@ export function AuthorWorkspace({ examId }: Props) {
   const [savedManifest, setSavedManifest] = useState<ExamManifest | null>(null);
   const [unlocked, setUnlocked] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [tool, setTool] = useState<QuestionType | null>(null);
+  const [tool, setTool] = useState<AuthorTool | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [clipboard, setClipboard] = useState<Question | null>(fieldClipboard);
@@ -326,10 +326,12 @@ export function AuthorWorkspace({ examId }: Props) {
       }
       // Create outside any state updater (ids must be generated exactly once).
       const q = createQuestion(theTool, page.index, rect, nextQuestionNumber(manifest.questions));
-      if (q.type === 'multiple-choice') q.anchors = [];
+      // A/B/C/D fields continue with anchoring; True/False fields get the button row by default.
+      const anchorNext = theTool === 'multiple-choice' && q.type === 'multiple-choice';
+      if (anchorNext) q.anchors = [];
       setManifest((m) => (m ? { ...m, questions: [...m.questions, q] } : m));
       setSelectedId(q.id);
-      if (q.type === 'multiple-choice') {
+      if (anchorNext) {
         setAnchoring({ questionId: q.id, index: 0 });
         setTool(null);
       } else if (!shift) {
@@ -342,7 +344,7 @@ export function AuthorWorkspace({ examId }: Props) {
   };
 
   /** Toolbar tool buttons toggle the tool; picking one abandons an unfinished anchoring. */
-  const pickTool = (t: QuestionType) => {
+  const pickTool = (t: AuthorTool) => {
     if (anchoring) cancelAnchoring();
     setTool(tool === t ? null : t);
   };
@@ -487,6 +489,7 @@ export function AuthorWorkspace({ examId }: Props) {
         <span className="status">Add field:</span>
         <div className="btn-group">
           <button className={`btn small${tool === 'multiple-choice' ? ' active' : ''}`} onClick={() => pickTool('multiple-choice')}>Multiple choice</button>
+          <button className={`btn small${tool === 'true-false' ? ' active' : ''}`} onClick={() => pickTool('true-false')} title="True / False, optionally Not Given">True / False</button>
           <button className={`btn small${tool === 'short-answer' ? ' active' : ''}`} onClick={() => pickTool('short-answer')}>Short answer</button>
           <button className={`btn small${tool === 'manual' ? ' active' : ''}`} onClick={() => pickTool('manual')}>Manual grading</button>
         </div>

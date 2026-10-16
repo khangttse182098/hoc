@@ -18,6 +18,7 @@ node phase2.cjs      # authoring (placement, drag, resize, zoom/resize drift, ke
 node copypaste.cjs   # copy a field with Cmd+C, paste copies under the mouse with Cmd+V / toolbar button
 node anchors.cjs     # multiple choice: drag a box, click the printed letters, drag markers, Esc fallback, student markers, results
 node growfield.cjs   # long answers in narrow boxes: font shrinks first, box widens only while focused, snaps back on blur
+node truefalse.cjs   # True/False preset: toolbar tool, Not Given toggle keeps/clears the key, type conversion, student buttons, grading
 node phase4.cjs      # export/import round trip, conflicts, corrupt packages, PIN gating
 BASE=http://localhost:4173/ node offline.cjs        # against `npm run preview`: blocks every non-localhost request, then goes fully offline
 ```

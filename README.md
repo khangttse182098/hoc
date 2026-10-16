@@ -87,6 +87,12 @@ Field types:
   letter rather than a separate button. Markers can be dragged afterwards,
   and the positions move with the box. Press Esc while placing letters to
   skip them; the field then shows a plain row of buttons instead.
+- **True / False / Not Given**: a multiple-choice question with the fixed
+  options T and F, plus NG when "Include Not Given" is ticked for that
+  question (the choice is remembered for the next field you add). Stored
+  and graded exactly like multiple choice, so packages need no new format;
+  the student sees T / F / NG buttons (full words on hover) and can click
+  printed letters instead if you set choice positions.
 - **Short answer**: free text checked against a list of accepted answers.
 - **Manual**: free text (optionally multiline) that the examiner grades after
   submission; a model answer can be stored for them.
@@ -118,7 +124,8 @@ assign points to manual questions; the final score updates as you go.
 Grading is deterministic and intentionally conservative.
 
 - Empty responses are never correct.
-- Multiple choice: the chosen option must equal the correct option.
+- Multiple choice (including True/False/Not Given): the chosen option must
+  equal the correct option.
 - Short answer: the response matches if it equals **any** accepted answer
   after both are normalized with the question's matching rules. Defaults:
   case-insensitive, trim, collapse internal whitespace, ignore punctuation,

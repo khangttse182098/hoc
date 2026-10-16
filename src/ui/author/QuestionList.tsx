@@ -1,5 +1,6 @@
 import type { Question } from '../../model/types';
 import { hasAnswerKey } from '../../grading/grade';
+import { isTrueFalse } from '../../model/trueFalse';
 
 interface Props {
   questions: Question[];
@@ -19,7 +20,7 @@ export function QuestionList({ questions, selectedId, onSelect }: Props) {
       {sorted.map((q) => (
         <li key={q.id} className={q.id === selectedId ? 'selected' : ''} onClick={() => onSelect(q)}>
           <span className="qnum">{q.number}</span>
-          <span className="qtype">{SHORT[q.type]} · p.{q.pageIndex + 1}</span>
+          <span className="qtype">{isTrueFalse(q) ? 'T/F' : SHORT[q.type]} · p.{q.pageIndex + 1}</span>
           <span className="qtype">{q.points} pt</span>
           {q.type === 'manual' ? (
             <span className="pill warn">manual</span>

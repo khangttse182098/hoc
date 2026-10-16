@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { isTrueFalse } from '../../model/trueFalse';
 import { newId } from '../../model/ids';
 import type { Attempt, Question, StoredExam } from '../../model/types';
 import { clampPoints, correctAnswerText, gradeAttempt } from '../../grading/grade';
@@ -196,7 +197,7 @@ export function ResultsScreen({ examId, attemptId }: Props) {
               return (
                 <tr key={q.id} className={rowClass}>
                   <td style={{ fontWeight: 600 }}>{q.number}</td>
-                  <td className="hint">{q.type === 'multiple-choice' ? 'MC' : q.type === 'short-answer' ? 'Text' : 'Manual'}</td>
+                  <td className="hint">{isTrueFalse(q) ? 'T/F' : q.type === 'multiple-choice' ? 'MC' : q.type === 'short-answer' ? 'Text' : 'Manual'}</td>
                   <td className="resp">{r.response === '' ? <span className="hint">(blank)</span> : r.response}</td>
                   <td>
                     {r.needsManualGrading ? (
